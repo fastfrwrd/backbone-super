@@ -35,10 +35,9 @@
 			_.extend(child.prototype, protoProps);
 			
 			// Copy the properties over onto the new prototype
-			for (var name in protoProps) {
-				// Check if we're overwriting an existing function
-				if (typeof protoProps[name] == "function" &&  fnTest.test(protoProps[name])) {
-					child.prototype[name] = (function(name, fn) {
+			_.each(protoProps, function(protoProp, protoName) {
+				if (_.isFunction(protoProp) && fnTest.test(protoProp)) {
+					child.prototype[protoName] = (function(name, fn) {
 						var wrapper = function() {
 							var tmp = this._super;
 
@@ -58,15 +57,15 @@
 						};
 
 						//we must move properties from old function to new
-						for (var prop in fn) {
-							wrapper[prop] = fn[prop];
-							delete fn[prop];
-						}
+						_.each(fn, function(fnProp, name) {
+							wrapper[name] = fnProp;
+							delete fn[name];
+						});
 						
 						return wrapper;
-					})(name, protoProps[name]);
+					})(protoName, protoProp);
 				}
-			}
+			});
 		}
 
 		// Add static properties to the constructor function, if supplied.
